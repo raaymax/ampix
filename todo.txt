@@ -1,0 +1,3 @@
+- zoom to cursor
+- different cursors
+
