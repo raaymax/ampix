@@ -1,8 +1,6 @@
 <p align="center">
   <img src="public/ampix.webp" title="screenshot">
 </p>
-[![Release](https://shields.io/github/v/release/raaymax/chat?display_name=tag)](https://shields.io/github/v/release/raaymax/chat?display_name=tag)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # AmPix
 
