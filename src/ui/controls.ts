@@ -131,6 +131,10 @@ export class Controls {
 		container.position.set(this.renderer.width - 55, 15);
 		container.interactive = true;
 
+		window.addEventListener('resize', () => {
+			container.position.set(this.renderer.width - 55, 15);
+		});
+
 		container.on('click', () => {
 			window.open("https://github.com/raaymax/ampix", "_blank");
 		});
