@@ -14,6 +14,7 @@ export class Renderer {
 	rendererSymbol = Symbol('renderer');
 	listeners: Record<string, (() => void)[]> = {};
 	logoTexture?: Texture;
+	ghTexture?: Texture;
 	
 	constructor(private core: Core) {
 	}
@@ -54,6 +55,7 @@ export class Renderer {
 		});
 		this.sheet = await Assets.load("/Logics/Logics.json");
 		this.logoTexture = await Assets.load("logo.png");
+		this.ghTexture = await Assets.load("gh.png");
 
 		document.body.appendChild(this.app.canvas);
 

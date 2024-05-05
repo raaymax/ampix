@@ -19,16 +19,10 @@ export class Controls {
 	activeTools: Record<string, boolean> = {};
 	tooltipTop = Controls.createTooltip(100);
 	tooltipBottom = Controls.createTooltip(520);
+	tooltipRotate = Controls.createTooltip(210);
 
 	constructor(private renderer: Renderer, private core: Core) {
 		this.sheet = renderer.sheet;
-	}
-
-
-	updateToolState(tool: string, active: boolean) {
-		this.buttons[tool].background.clear();
-		this.buttons[tool].background.rect(0, 0, 32, 32);
-		this.buttons[tool].background.fill(active ? PALETTE.uiButton.active : PALETTE.uiButton.normal);
 	}
 
 	init() {
@@ -46,10 +40,21 @@ export class Controls {
 				this.buttons[tool].update();
 			});
 			this.activeTools = tools
+
+			const rotations = this.core.getDefinition(this.core.getComponent() as any)?.rotations ?? 0;
+			if(rotations > 1){
+				this.tooltipRotate.show(`press R to rotate object`);
+			}else{
+				this.tooltipRotate.hide();
+			}
+
 		});
 		
 		this.container.addChild(this.tooltipTop.container);
 		this.container.addChild(this.tooltipBottom.container);
+		this.container.addChild(this.tooltipRotate.container);
+		this.tooltipRotate.container.position.set(20, this.renderer.height - 120);
+		this.container.addChild(this.createGHLink());
 
 		window.addEventListener('resize', () => {
 			this.renderActions();
@@ -114,6 +119,28 @@ export class Controls {
 		const container = new Container();
 		const logo = new Sprite(this.renderer.logoTexture);
 		container.addChild(logo);
+		return container;
+	}
+
+	createGHLink = () => {
+		const container = new Container();
+		const logo = new Sprite(this.renderer.ghTexture);
+		logo.width = 40;
+		logo.height = 40;
+		container.addChild(logo);
+		container.position.set(this.renderer.width - 55, 15);
+		container.interactive = true;
+
+		container.on('click', () => {
+			window.open("https://github.com/raaymax/ampix", "_blank");
+		});
+
+		container.on('mouseenter', () => {
+			this.tooltipTop.show("code");
+		});
+		container.on('mouseleave', () => {
+			this.tooltipTop.hide();
+		});
 		return container;
 	}
 
