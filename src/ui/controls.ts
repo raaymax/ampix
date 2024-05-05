@@ -5,7 +5,6 @@ import { Renderer } from "./renderer";
 import { Core } from "../core";
 
 export class Controls {
-	logo: Sprite;
 	container = new Container();
 	uiContainer = new Container();
 	simContainer = new Container();
@@ -114,9 +113,7 @@ export class Controls {
 	createLogo = () => {
 		const container = new Container();
 		const logo = new Sprite(this.renderer.logoTexture);
-		
 		container.addChild(logo);
-
 		return container;
 	}
 
