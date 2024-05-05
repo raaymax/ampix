@@ -3,6 +3,7 @@ import type { World } from '../world';
 
 export class Not extends Component {
 	static definition = Component.createDefinition('not', {
+		description: 'Not - a component that outputs the opposite of the input',
 		rotations: 4,
 		space: [
 			0, 0, 0,
@@ -16,8 +17,7 @@ export class Not extends Component {
 	}
 
 	update(){
-		this.powered = !this.inputs.some(i => i.powered)
+		this.output.value = !this.inputs.some(i => i.powered)
 		this.emit('change');
-		this.emit('output');
 	}
 }

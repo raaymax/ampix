@@ -9,6 +9,7 @@ import { NorGate } from './nor';
 import { XorGate } from './xor';
 import { XnorGate } from './xnor';
 import { Tunnel } from './tunnel';
+import { Clock } from './clock';
 
 export * from './component';
 
@@ -24,4 +25,5 @@ export default {
 	xor: XorGate,
 	xnor: XnorGate,
 	tunnel: Tunnel,
+	clock: Clock
 };

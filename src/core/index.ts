@@ -17,8 +17,13 @@ export class Core {
 		this.state = {
 			running: false,
 			paused: false,
-			activeTools: {interact: true}
+			activeTools: {interact: true, play: true}
 		};
+		this.on('tick', (t) => {
+			if (this.state.activeTools.play && !this.state.activeTools.pause){
+				this.world.tick(t.deltaMS)
+			}
+		})
 	}
 
 	getAppState() {
@@ -49,13 +54,16 @@ export class Core {
 	isToolActive(tool: string) {
 		return this.state.activeTools[tool];
 	}
-
-	getDefinition() {
+	getCurrentDefinition() {
 		const component = this.getComponent();
 		if (!component) {
 			return null;
 		}
-		return Components[component]?.definition;
+		return this.getDefinition(component);
+	}
+
+	getDefinition(type: string) {
+		return Components[type]?.definition;
 	}
 
 	selectTool(tool: string) {
@@ -85,6 +93,10 @@ export class Core {
 				tools.play = false;
 				tools.pause = false;
 				this.world.tick();
+				break;
+			case 'clear':
+				Object.assign(tools, this.state.activeTools);
+				this.world.clear();
 				break;
 			default:
 				Object.assign(tools, {

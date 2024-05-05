@@ -66,7 +66,7 @@ export class Renderer {
 		this.redrawBackground();
 
 		this.app.ticker.add((time) => {
-
+			this.core.emit('tick', time);
 		});
 
 		this.background.interactive = true;
@@ -77,6 +77,10 @@ export class Renderer {
 			event.preventDefault()
 			event.stopPropagation()
 		}, {passive: false});
+
+		window.addEventListener('resize', () => {
+			this.redrawBackground();
+		});
 	}
 	onMouseWheel = (event: WheelEvent) => {
 		const dx = event.deltaX;

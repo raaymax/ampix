@@ -16,6 +16,9 @@ export class Map {
 		this.renderer.on('zoom', this.renderMap);
 		this.renderer.on('move', this.renderMap);
 		this.renderMap();
+		window.addEventListener('resize', () => {
+			this.renderMap();
+		});
 	}
 
 	renderMap = () => {
@@ -97,7 +100,11 @@ export class Map {
 			r.background.fill(PALETTE.background);
 		} else {
 			r.background.fill(PALETTE.component[f.type])
-			r.background.alpha = f?.component?.powered ? 1.0 : 0.5;
+			if(this.core.getDefinition(f.type).power) {
+				r.background.alpha = f?.component?.powered ? 1.0 : 0.5;
+			}else{
+				r.background.alpha = 1.0;
+			}
 		}
 		r.background.stroke(0x000000);
 	}

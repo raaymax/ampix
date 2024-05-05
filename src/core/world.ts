@@ -31,11 +31,10 @@ export class World {
 			new Pos(pos.x, pos.y - 1),
 			new Pos(pos.x + 1, pos.y),
 			new Pos(pos.x, pos.y + 1),
-		].filter(p => this.isPosValid(p));
+		];
 
 		return neighbours
-			.map(p => this.ctrls.find(c => c.hasPos(p)))
-			.filter(c => typeof c !== 'undefined') as Component[];
+			.map(p => this.getPos(p)?.component) as Component[];
 	}
 
 	forEach(callback: (field: Field, pos: Pos) => void) {
@@ -58,16 +57,21 @@ export class World {
 		if (!f) {
 			return;
 		}
-		f.rotation = rotation;
 		if(type === 'empty'){
 			const c = f?.component;
-			if(c) c.uninstall(f);
+			if(c) {
+				c.uninstall(f);
+				this.rebuild(c);
+			}
+			f.rotation = rotation;
 			return;
 		}
+		f.rotation = rotation;
 		const def = Components[type].definition;
 		const c = f?.component;
 		if (c && c.type !== type) {
 			c.uninstall(f);
+			this.rebuild(c);
 			if (def.merge) {
 				this.mergeComponents(pos, type, rotation);
 			} else {
@@ -93,14 +97,61 @@ export class World {
 		const newComponent = new Components[type](this);
 		newComponent.install(f, rotation);
 		this.ctrls.push(newComponent);
+		if(type === 'tunnel'){
+			this.crossMergeLinks(pos);
+		}
+	}
+
+	crossMergeLinks(pos: Pos) {
+		const neighbours = this.getNeighbourComponents(pos).map(c => {
+			return c?.type === 'link' ? c : null;
+		}) as Component[];
+		console.log(neighbours);
+
+		if(neighbours.length < 2)
+				return;
+
+		if(neighbours[0] && neighbours[2]){
+			const newComponent = new Components.link(this);
+			this.ctrls.push(newComponent);
+			[neighbours[0], neighbours[2]].forEach(c => {
+				const fields = [...c.fields];
+				fields.forEach(f => c.uninstall(f));
+				fields.forEach(f => newComponent.install(f));
+				this.ctrls = this.ctrls.filter(ctrl => ctrl !== c);
+			});
+		}
+		if(neighbours[1] && neighbours[3]){
+			const newComponent = new Components.link(this);
+			this.ctrls.push(newComponent);
+			[neighbours[1], neighbours[3]].forEach(c => {
+				const fields = [...c.fields];
+				fields.forEach(f => c.uninstall(f));
+				fields.forEach(f => newComponent.install(f));
+				this.ctrls = this.ctrls.filter(ctrl => ctrl !== c);
+			});
+		}
 	}
 
 	mergeComponents(pos: Pos, type: string, rotation: number = 0) {
 		const f = this.getPos(pos);
 		if(!f) return;
-		const neighbours = this.getNeighbourComponents(pos).filter(c => c.type === type);
+		const neighbours = this.getNeighbourComponents(pos).filter(Boolean).filter(c => {
+			return c.type === type || (type === 'link' && c.type === 'tunnel');
+		}).map(c => {
+			if (c.type === 'tunnel') {
+				const other = this.getPos(c.fields[0].add(c.fields[0].sub(pos)))?.component;
+				if (other?.type === 'link') {
+					return c;
+				}
+				return null;
+			}
+			return c;
+		}).filter(Boolean) as Component[];
+		console.log(neighbours)
+
 		if(neighbours.length === 1) {
-			neighbours[0].install(f, rotation);
+			neighbours[0].install(f);
 		}
 		if(neighbours.length === 0) {
 			const newComponent = new Components[type](this);
@@ -121,12 +172,33 @@ export class World {
 		}
 	}
 
-	tick() {
-		this.ctrls.forEach(c => c.safeUpdate());
+	rebuild(c: Component) {
+		const fields = [...c.fields];
+		const type = c.type;
+		fields.forEach(f => {
+			c.uninstall(f);
+		});
+		fields.forEach(f => {
+			this.setPos(f, type, f.rotation);
+		});
+	}
+
+
+	tick(dt: number) {
+		this.ctrls.forEach(c => c.safeUpdate(dt));
 	}
 
 	rmCtrl = (c: Component) => {
 		this.ctrls = this.ctrls.filter(ctrl => ctrl !== c);
+	}
+
+	clear() {
+		this.data.forEach(f => {
+			if(f.component) {
+				f.component.fields.forEach(f => f?.component?.uninstall(f));
+			}
+		})
+		console.log(this);
 	}
 
 }

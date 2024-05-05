@@ -18,11 +18,11 @@ export class Cursor {
 	
 	constructor(private renderer: Renderer, private core: Core) {
 		this.sheet = renderer.sheet;
-		this.definition = core.getDefinition();
+		this.definition = core.getCurrentDefinition();
 	}
 
 	async init() {
-		this.cursor.alpha = 0.5;
+		this.cursor.alpha = PALETTE.cursor.alpha;
 		this.cursorContainer.addChild(this.cursor);
 		this.renderer.addChild(this.cursorContainer);
 		this.renderer.app.renderer.view.canvas.addEventListener('mousemove', event => {
@@ -30,7 +30,7 @@ export class Cursor {
 			this.redrawCursor()
 		});
 		this.core.on('toolsChange', () => {
-			this.definition = this.core.getDefinition();
+			this.definition = this.core.getCurrentDefinition();
 			if(!this.definition) return;
 			this.rotation = this.rotation % this.definition.rotations;
 			this.redrawCursor();
@@ -100,13 +100,13 @@ export class Cursor {
 					case 0:
 						break;
 					case 1:
-						this.cursor.fill(PALETTE.cursor);
+						this.cursor.fill(PALETTE.cursor.component);
 						break;
 					case 2:
-						this.cursor.fill(PALETTE.output.unpowered);
+						this.cursor.fill(PALETTE.cursor.output);
 						break;
 					case 3:
-						this.cursor.fill(PALETTE.input.unpowered);
+						this.cursor.fill(PALETTE.cursor.input);
 						break;
 				}
 

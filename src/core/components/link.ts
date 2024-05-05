@@ -3,7 +3,10 @@ import type { World } from '../world';
 import type { Field } from '../field';
 
 export class Link extends Component {
-	static definition = Component.createDefinition('link');
+	static definition = Component.createDefinition('link', {
+		description: 'Link - a component to connect outputs to inputs',
+		power:true,
+	});
 
 	constructor(world: World) {
 		super(world, Link.definition);
@@ -14,13 +17,13 @@ export class Link extends Component {
 		if(this.powered !== pow) {
 			this.powered = pow;
 			this.emit('change');
-			this.emit('power')
 		}
 	}
 
 	install(field: Field) {
-		field.on('field:power', this.outputListener);
 		super.install(field);
+		field.on('field:power', this.outputListener);
+		this.outputListener();
 	}
 
 	uninstall(field: Field) {

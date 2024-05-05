@@ -1,5 +1,5 @@
 
-import { Sprite, Graphics, Container, Spritesheet } from "pixi.js";
+import { Sprite, Graphics, Container, Spritesheet, TextStyle, Text } from "pixi.js";
 import { PALETTE } from "./palette";
 import { Renderer } from "./renderer";
 import { Core } from "../core";
@@ -17,10 +17,13 @@ export class Controls {
 		update: () => void,
 	}> = {};
 	activeTools: Record<string, boolean> = {};
+	tooltipTop = Controls.createTooltip(100);
+	tooltipBottom = Controls.createTooltip(520);
 
 	constructor(private renderer: Renderer, private core: Core) {
 		this.sheet = renderer.sheet;
 	}
+
 
 	updateToolState(tool: string, active: boolean) {
 		this.buttons[tool].background.clear();
@@ -43,6 +46,17 @@ export class Controls {
 				this.buttons[tool].update();
 			});
 			this.activeTools = tools
+		});
+		const bg = new Graphics();
+		bg.rect(0, 0, 500, 32);
+		bg.fill(PALETTE.tooltipBackground);
+		bg.stroke(PALETTE.tooltipBorder);
+		
+		this.container.addChild(this.tooltipTop.container);
+		this.container.addChild(this.tooltipBottom.container);
+
+		window.addEventListener('resize', () => {
+			this.renderActions();
 		});
 	}
 
@@ -78,8 +92,16 @@ export class Controls {
 
 		container.on('mouseenter', () => {
 			drawBackground('hover');
+			const def = this.core.getDefinition(type);
+			if (def) {
+				this.tooltipBottom.show(def.description);
+			} else { 
+				this.tooltipTop.show(type);
+			}
 		});
 		container.on('mouseleave', () => {
+			this.tooltipBottom.hide();
+			this.tooltipTop.hide();
 			drawBackground();
 		});
 		this.buttons[type] = {
@@ -99,14 +121,18 @@ export class Controls {
 			this.createButton("play"),
 			this.createButton("pause"),
 			this.createButton("stop"),
+			null,
+			this.createButton("interact"),
+			null,
 			this.createButton("clear"),
 			this.createButton("remove"),
-			this.createButton("label"),
-			this.createButton("interact"),
+			//this.createButton("label"),
 		].forEach((component, idx) => {
+			if (!component) return;
 			component.position.set(34 * idx, 0);
 			this.simContainer.addChild(component);
 		});
+		this.tooltipTop.container.position.set(21, 55);
 		this.simContainer.position.set(20, 10);
 		this.simContainer.scale.set(1.3);
 	}
@@ -114,27 +140,59 @@ export class Controls {
 	renderActions = () => {
 		this.uiContainer.removeChildren();
 		[
-			this.createButton("or"),
-			this.createButton("and"),
+			this.createButton("buffer"),
 			this.createButton("not"),
-			this.createButton("nand"),
+			this.createButton("or"),
 			this.createButton("nor"),
+			this.createButton("and"),
+			this.createButton("nand"),
 			this.createButton("xor"),
 			this.createButton("xnor"),
-			this.createButton("input"),
-			this.createButton("output"),
 			this.createButton("button"),
 			this.createButton("clock"),
 			this.createButton("tunnel"),
 			this.createButton("link"),
-			this.createButton("buffer"),
 		].forEach((component, idx) => {
 			component.position.set(34 * idx, 0);
 			this.uiContainer.addChild(component);
 		});
 
+		this.tooltipBottom.container.position.set(21, this.renderer.height - 85);
 		this.uiContainer.position.set(20, this.renderer.height - 50);
 		this.uiContainer.scale.set(1.3);
 	}
+	
+	static createTooltip = (w: number) => {
+		const container = new Container();
+		const tooltipStyle = new TextStyle({
+			fontFamily: 'Arial',
+			fontSize: 18,
+			fill: PALETTE.tooltip.text,
+			//stroke: { color: 'black', width: 1 },
+			wordWrap: true,
+			wordWrapWidth: w - 20,
+		})
+		const tooltipText = new Text({text: '', style: tooltipStyle});
 
+		const bg = new Graphics();
+		bg.rect(0, 0, w, 32);
+		bg.fill(PALETTE.tooltip.background);
+		bg.stroke(PALETTE.tooltip.border);
+		tooltipText.position.set(10, 7);
+		container.addChild(bg);
+		container.addChild(tooltipText);
+		container.position.set(10, 10);
+		container.renderable = false;
+	
+		return {
+			container,
+			show: (text: string) => {
+				tooltipText.text = text;
+				container.renderable = true;
+			},
+			hide: () => {
+				container.renderable = false;
+			}
+		}
+	}
 }

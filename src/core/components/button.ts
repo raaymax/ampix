@@ -5,6 +5,8 @@ import type { Field } from '../field';
 export class Button extends Component {
 
 	static definition = Component.createDefinition('button', {
+		description: 'Button - a component that can be toggled on and off',
+		power:true,
 		space: [
 			0, 2, 0,
 			2, 1, 2,
@@ -18,7 +20,7 @@ export class Button extends Component {
 
 	interact() {
 		this.powered = !this.powered;
+		this.output.value = this.powered;
 		this.emit('change');
-		this.emit('output');
 	}
 }

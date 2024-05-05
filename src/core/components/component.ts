@@ -1,4 +1,5 @@
 import { Pos } from "../../pos";
+import { Output } from '../output';
 import type { Field } from "../field";
 import type { World } from "../world";
 
@@ -6,7 +7,8 @@ export class Component {
 	type: string;
 	label: string = '';
 	priority: number = 10;
-	powered: boolean = false;
+	output: Output = new Output();
+	powered?: boolean;
 	fields: Field[] = [];
 	world: World;
 	inputs: Field[] = [];
@@ -17,6 +19,7 @@ export class Component {
 	static createDefinition = (type:string, ext = {}) => {
 		return {
 			type,
+			power: false,
 			merge: true,
 			rotations: 1,
 			space: [
@@ -58,7 +61,7 @@ export class Component {
 	install(field: Field) {
 		const {inputs, outputs} = this.getIO(field);
 		outputs.forEach(f => {
-			f.addOutputSource(this);
+			f.addOutputSource(this.output);
 		});
 		this.inputs.push(...inputs);
 		this.fields.push(field);
@@ -68,8 +71,9 @@ export class Component {
 
 	uninstall(field: Field) {
 		const {inputs, outputs} = this.getIO(field);
+		this.output.value = false;
 		outputs.forEach(f => {
-			f.rmOutputSource(this);
+			f.rmOutputSource(this.output);
 		});
 		inputs.forEach(i => {
 			this.inputs.slice(this.inputs.indexOf(i))
@@ -117,14 +121,14 @@ export class Component {
 	update() {
 	}
 
-	safeUpdate() {
+	safeUpdate(dt) {
 		if (this.inputs.length > 0 && this.inputs.map(i=> i.powered).filter(p => typeof p !== 'undefined').length === 0){
 			this.error = "error";
 			this.emit('change');
 			return;
 		}
 		this.error = null;
-		this.update();
+		this.update(dt);
 	}
 	
 	on(name: string, fn: (component: Component) => void) {

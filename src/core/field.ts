@@ -1,5 +1,6 @@
 import { Pos } from '../pos';
 import { Component } from './components/component';
+import { Output } from './output';
 
 const idGenerator = function*() {
 	let id = 0;
@@ -15,7 +16,7 @@ export class Field extends Pos {
 	label: string;
 	component: Component | null = null;
 	listeners: Record<string, ((field: Field) => void)[]> = {};
-	outputSources: Component[] = [];
+	outputSources: Output[] = [];
 	rotation: number = 0;
 
 	constructor(x: number, y: number) {
@@ -24,12 +25,12 @@ export class Field extends Pos {
 		this.label = '';
 	}
 
-	addOutputSource(c: Component) {
+	addOutputSource(c: Output) {
 		this.outputSources.push(c);
-		c.on('output', this.emitPowered);
+		c.on('change', this.emitPowered);
 	}
 
-	rmOutputSource(c: Component) {
+	rmOutputSource(c: Output) {
 		const idx = this.outputSources.indexOf(c);
 		if (idx !== -1) {
 			this.outputSources.splice(idx,1)
@@ -37,7 +38,7 @@ export class Field extends Pos {
 			throw new Error('Trying to remove output source that dont exist')
 		}
 		console.log()
-		c.off('output', this.emitPowered);
+		c.off('change', this.emitPowered);
 	}
 
 	emitPowered = () => {
@@ -49,7 +50,7 @@ export class Field extends Pos {
 	}
 
 	get output() {
-		return this.outputSources.reduce((acc, c) => acc || c.powered, false);
+		return this.outputSources.reduce<boolean | undefined>((acc, c: Output) => acc || c.value, false);
 	}
 
 	get powered() {
