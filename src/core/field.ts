@@ -24,7 +24,6 @@ export class Field extends Pos {
 		}else {
 			throw new Error('Trying to remove output source that dont exist')
 		}
-		console.log()
 		c.off('change', this.emitPowered);
 	}
 

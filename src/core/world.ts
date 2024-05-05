@@ -88,11 +88,11 @@ export class World {
 			f.rotation = rotation;
 			return;
 		}
-		f.rotation = rotation;
 		const def = Components[type as keyof typeof Components].definition;
 		const c = f?.component;
 		if (c) {
 			c.uninstall(f);
+			f.rotation = rotation;
 			this.rebuild(c);
 			if (def.merge) {
 				this.mergeComponents(pos, type);
@@ -100,6 +100,7 @@ export class World {
 				this.single(pos, type);
 			}
 		}  else {
+			f.rotation = rotation;
 			if (def.merge) {
 				this.mergeComponents(pos, type);
 			}else {
@@ -123,7 +124,6 @@ export class World {
 		const neighbours = this.getNeighbourComponents(pos).map(c => {
 			return c?.type === 'link' ? c : null;
 		}) as Component[];
-		console.log(neighbours);
 
 		if(neighbours.length < 2)
 				return;
@@ -165,7 +165,6 @@ export class World {
 			}
 			return c;
 		}).filter(Boolean) as Component[];
-		console.log(neighbours)
 
 		if(neighbours.length === 1) {
 			neighbours[0].install(f);
@@ -215,8 +214,6 @@ export class World {
 				f.component.fields.forEach(f => f?.component?.uninstall(f));
 			}
 		})
-		console.log(this);
 	}
-
 }
 

@@ -16,7 +16,6 @@ export class XorGate extends Component{
 
 	update(){
 		const inputs = this.inputs.filter(i => typeof i.powered !== 'undefined');
-		console.log(inputs)
 		this.output.value = inputs.filter(i => Boolean(i.powered)).length === 1;
 		this.emit('change');
 	}
