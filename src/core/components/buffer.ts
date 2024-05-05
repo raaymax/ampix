@@ -1,20 +1,18 @@
-import { Component } from './component';
-import type { World } from '../world';
+import { Component, ComponentDefinition } from './component';
 
 export class Buffer extends Component {
-	static definition = Component.createDefinition('buffer', {
+	static definition: ComponentDefinition = {
+		type: 'buffer',
 		description: 'Buffer - a component that outputs the same value as the input',
+		power: false,
+		merge: false,
 		rotations: 4,
 		space: [
 			0, 0, 0,
 			3, 1, 2,
 			0, 0, 0
 		],
-	});
-
-	constructor(world: World) {
-		super(world, Buffer.definition);
-	}
+	};
 
 	update(){
 		this.output.value = this.inputs.some(i => i.powered)

@@ -1,19 +1,22 @@
-import { Component } from './component';
-import type { World } from '../world';
+import { Component, ComponentDefinition } from './component';
 import type { Field } from '../field';
 
 export class Link extends Component {
-	static definition = Component.createDefinition('link', {
+	static definition: ComponentDefinition = {
+		type: 'link',
 		description: 'Link - a component to connect outputs to inputs',
 		power:true,
-	});
-
-	constructor(world: World) {
-		super(world, Link.definition);
-	}
+		merge: true,
+		rotations: 1,
+		space: [
+			0, 0, 0,
+			0, 1, 0,
+			0, 0, 0
+		],
+	};
 
 	outputListener = () => {
-		const pow = this.fields.reduce((acc, f) => acc || f.output, false);
+		const pow = this.fields.reduce<boolean | undefined>((acc, f) => acc || f.output, false);
 		if(this.powered !== pow) {
 			this.powered = pow;
 			this.emit('change');

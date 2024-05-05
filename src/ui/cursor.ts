@@ -3,14 +3,14 @@ import { PALETTE } from "./palette";
 import { Core } from "../core";
 import { Renderer } from "./renderer";
 import { Pos } from "../pos";
-import { ComponentDefinition } from "../types";
+import { ComponentDefinition } from "../core";
 
 export class Cursor {
   cursor = new Graphics();
-	sprite: Sprite;
+	sprite: Sprite | null = null;
 	cursorContainer = new Container();
 	sheet?: Spritesheet;
-	definition: ComponentDefinition;
+	definition: ComponentDefinition | undefined | null;
 	rotation = 0;
 	tool = '';
 	mousePos: Pos = Pos.from({x: 0, y: 0});
@@ -25,7 +25,8 @@ export class Cursor {
 		this.cursor.alpha = PALETTE.cursor.alpha;
 		this.cursorContainer.addChild(this.cursor);
 		this.renderer.addChild(this.cursorContainer);
-		this.renderer.app.renderer.view.canvas.addEventListener('mousemove', event => {
+		this.renderer.app.renderer.view.canvas.addEventListener?.('mousemove', (ev: Event) => {
+			const event: MouseEvent = ev as MouseEvent;
 			this.mousePos = Pos.from({x: event.offsetX, y: event.offsetY});
 			this.redrawCursor()
 		});
@@ -41,8 +42,27 @@ export class Cursor {
 				this.core.positionClicked(pos, this.rotation);
 			}
 		});
+		let pointerDown = false;
+		this.renderer.background.on('pointerdown', (event) => {
+			pointerDown = true;
+			const pos = this.renderer.screenToWorldPos(Pos.from(event.screen));
+			if (this.renderer.isWorldSpace(pos)) {
+				this.core.positionClicked(pos, this.rotation);
+			}
+		});
+		this.renderer.background.on('pointermove', (event) => {
+			if(pointerDown) {
+				const pos = this.renderer.screenToWorldPos(Pos.from(event.screen));
+				if (this.renderer.isWorldSpace(pos)) {
+					this.core.positionClicked(pos, this.rotation);
+				}
+			}
+		});
+		this.renderer.background.on('pointerup', () => {
+			pointerDown = false;
+		});
 		document.body.addEventListener('keydown', (event) => {
-			if (event.key === 'r') {
+			if (this.definition && event.key === 'r') {
 				this.rotation = (this.rotation + 1) % this.definition.rotations;
 				this.redrawCursor();
 			}

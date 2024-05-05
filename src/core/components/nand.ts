@@ -1,13 +1,18 @@
-import type { World } from "../world";
-import { Gate } from "./gate";
+import { Component, ComponentDefinition } from "./component";
 
-export class NandGate extends Gate {
-	static definition = Gate.createDefinition('nand', {
+export class NandGate extends Component {
+	static definition: ComponentDefinition = {
 		description: 'NAND Gate - outputs true if all inputs are false',
-	});
-	constructor(world: World) {
-		super(world, NandGate.definition);
-	}
+		type: 'nand',
+		power: false,
+		merge: false,
+		rotations: 4,
+		space: [
+			0, 3, 0,
+			3, 1, 2,
+			0, 3, 0
+		],
+	};
 
 	update(){
 		const inputs = this.inputs.filter(i => typeof i.powered !== 'undefined')

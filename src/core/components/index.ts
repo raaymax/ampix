@@ -11,6 +11,8 @@ import { XnorGate } from './xnor';
 import { Tunnel } from './tunnel';
 import { Clock } from './clock';
 
+export type { ComponentDefinition, Component } from './component';
+
 export * from './component';
 
 export default {

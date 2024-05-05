@@ -1,12 +1,12 @@
 import { Pos } from "../pos";
 import { World } from "./world";
-import Components from "./components";
+import Components, { ComponentDefinition } from "./components";
 
-export type AppState = {
-	running: boolean;
-	paused: boolean;
-	activeTools: Record<string, boolean>;
-};
+export type { ComponentDefinition } from './components';
+
+export type AppState = Record<keyof typeof Components | string, boolean>;
+
+export type ComponentType = keyof typeof Components;
 
 export class Core {
 	state: AppState;
@@ -14,13 +14,9 @@ export class Core {
 	world = new World(100, 100);
 
 	constructor() {
-		this.state = {
-			running: false,
-			paused: false,
-			activeTools: {interact: true, play: true}
-		};
+		this.state = {interact: true, play: true};
 		this.on('tick', (t) => {
-			if (this.state.activeTools.play && !this.state.activeTools.pause){
+			if (this.state.play && !this.state.pause){
 				this.world.tick(t.deltaMS)
 			}
 		})
@@ -43,18 +39,15 @@ export class Core {
 		}
 	}
 
-	set(newState: Partial<AppState>) {
-		this.state = {
-			...this.state,
-			...newState,
-		};
+	set(newState: AppState) {
+		this.state = newState;
 		this.emit('change');
 	}
 
-	isToolActive(tool: string) {
-		return this.state.activeTools[tool];
+	isToolActive(tool: string): boolean {
+		return this.state[tool];
 	}
-	getCurrentDefinition() {
+	getCurrentDefinition(): ComponentDefinition | null{
 		const component = this.getComponent();
 		if (!component) {
 			return null;
@@ -62,7 +55,7 @@ export class Core {
 		return this.getDefinition(component);
 	}
 
-	getDefinition(type: string) {
+	getDefinition(type: keyof typeof Components): ComponentDefinition {
 		return Components[type]?.definition;
 	}
 
@@ -71,48 +64,57 @@ export class Core {
 		const tools = {} as Record<string, boolean>;
 		switch (tool) {
 			case 'play':
-				Object.assign(tools, this.state.activeTools);
+				Object.assign(tools, this.state);
 				tools.play = true;
 				tools.pause = false;
 				break;
 			case 'pause':
-				Object.assign(tools, this.state.activeTools);
+				Object.assign(tools, this.state);
 				if (tools.play) {
-				tools.pause = !this.state.activeTools.pause;
+				tools.pause = !this.state.pause;
 				}else{ 
 					tools.pause = false;
 				}
 				break;
 			case 'stop':
-				Object.assign(tools, this.state.activeTools);
+				Object.assign(tools, this.state);
 				tools.play = false;
 				tools.pause = false;
 				break;
 			case 'tick':
-				Object.assign(tools, this.state.activeTools);
+				Object.assign(tools, this.state);
 				tools.play = false;
 				tools.pause = false;
-				this.world.tick();
+				this.world.tick(0);
 				break;
 			case 'clear':
-				Object.assign(tools, this.state.activeTools);
+				Object.assign(tools, this.state);
 				this.world.clear();
 				break;
+			case 'remove':
+				Object.assign(tools, {
+					play: Boolean(this.state.play),
+					pause: Boolean(this.state.pause),
+					remove: !this.state.remove,
+					interact: this.state.remove  
+				});
+				break;
+
 			default:
 				Object.assign(tools, {
-					play: Boolean(this.state.activeTools.play),
-					pause: Boolean(this.state.activeTools.pause),
+					play: Boolean(this.state.play),
+					pause: Boolean(this.state.pause),
 					[tool]: true
 				});
 				break;
 		}
-		this.set({ activeTools: tools });
-		this.emit('toolsChange', this.state.activeTools);
+		this.set({ ...tools });
+		this.emit('toolsChange', this.state);
 	}
 
-	getComponent() {
-		return Object.keys(this.state.activeTools)
-			.find(key => this.state.activeTools[key] && Object.keys(Components).includes(key));
+	getComponent(): keyof typeof Components | undefined {
+		return Object.keys(this.state)
+			.find(key => this.state[key] && Object.keys(Components).includes(key)) as keyof typeof Components | undefined;
 	}
 
 	positionClicked(pos: Pos, rotation: number = 0) {

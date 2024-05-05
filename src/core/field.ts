@@ -1,19 +1,8 @@
 import { Pos } from '../pos';
-import { Component } from './components/component';
+import Components, { Component } from './components';
 import { Output } from './output';
 
-const idGenerator = function*() {
-	let id = 0;
-	while (true) {
-		yield id++;
-	}
-}
-
-const getNextId = idGenerator();
-
 export class Field extends Pos {
-	id: number;
-	label: string;
 	component: Component | null = null;
 	listeners: Record<string, ((field: Field) => void)[]> = {};
 	outputSources: Output[] = [];
@@ -21,8 +10,6 @@ export class Field extends Pos {
 
 	constructor(x: number, y: number) {
 		super(x, y);
-		this.id = getNextId.next().value;
-		this.label = '';
 	}
 
 	addOutputSource(c: Output) {
@@ -45,8 +32,8 @@ export class Field extends Pos {
 		this.emit('field:power');
 	}
 
-	get type() {
-		return this.component?.type ?? 'empty';
+	get type(): keyof typeof Components | 'empty'{
+		return (this.component?.type ?? 'empty') as keyof typeof Components | 'empty';
 	}
 
 	get output() {

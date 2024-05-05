@@ -5,6 +5,7 @@ import { Renderer } from "./renderer";
 import { Core } from "../core";
 
 export class Controls {
+	logo: Sprite;
 	container = new Container();
 	uiContainer = new Container();
 	simContainer = new Container();
@@ -37,7 +38,7 @@ export class Controls {
 		this.container.addChild(this.uiContainer);
 		this.container.addChild(this.simContainer);
 		this.renderer.addChild(this.container);
-		this.activeTools = this.core.getAppState().activeTools;
+		this.activeTools = this.core.getAppState();
 		this.core.on('toolsChange', (tools: Record<string, boolean>) => {
 			new Set([
 				...Object.keys(this.activeTools),
@@ -47,10 +48,6 @@ export class Controls {
 			});
 			this.activeTools = tools
 		});
-		const bg = new Graphics();
-		bg.rect(0, 0, 500, 32);
-		bg.fill(PALETTE.tooltipBackground);
-		bg.stroke(PALETTE.tooltipBorder);
 		
 		this.container.addChild(this.tooltipTop.container);
 		this.container.addChild(this.tooltipBottom.container);
@@ -92,7 +89,7 @@ export class Controls {
 
 		container.on('mouseenter', () => {
 			drawBackground('hover');
-			const def = this.core.getDefinition(type);
+			const def = this.core.getDefinition(type as any);
 			if (def) {
 				this.tooltipBottom.show(def.description);
 			} else { 
@@ -114,9 +111,19 @@ export class Controls {
 		return container;
 	}
 
+	createLogo = () => {
+		const container = new Container();
+		const logo = new Sprite(this.renderer.logoTexture);
+		
+		container.addChild(logo);
+
+		return container;
+	}
+
 	renderSim = () => {
 		this.simContainer.removeChildren();
 		[
+			this.createLogo(),
 			this.createButton("tick"),
 			this.createButton("play"),
 			this.createButton("pause"),

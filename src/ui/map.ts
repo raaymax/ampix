@@ -64,7 +64,7 @@ export class Map {
 
 	update = (f: Field) => {
 		if(!f) return;
-		const {size, offsetX, offsetY} = this.renderer;
+		const { size } = this.renderer;
 		const screenPos = this.renderer.worldToScreenPos(f);
 		const r = this.getRenderer(f);
 		if(r.sprite) {
@@ -99,8 +99,8 @@ export class Map {
 		if(!f.component) {
 			r.background.fill(PALETTE.background);
 		} else {
-			r.background.fill(PALETTE.component[f.type])
-			if(this.core.getDefinition(f.type).power) {
+			r.background.fill(PALETTE.component[f.type as keyof typeof PALETTE.component])
+			if(this.core.getDefinition(f.type as any).power) {
 				r.background.alpha = f?.component?.powered ? 1.0 : 0.5;
 			}else{
 				r.background.alpha = 1.0;

@@ -57,6 +57,8 @@ export class World {
 		if (!f) {
 			return;
 		}
+		if(f.type === type) return;
+
 		if(type === 'empty'){
 			const c = f?.component;
 			if(c) {
@@ -67,35 +69,30 @@ export class World {
 			return;
 		}
 		f.rotation = rotation;
-		const def = Components[type].definition;
+		const def = Components[type as keyof typeof Components].definition;
 		const c = f?.component;
-		if (c && c.type !== type) {
+		if (c) {
 			c.uninstall(f);
 			this.rebuild(c);
 			if (def.merge) {
-				this.mergeComponents(pos, type, rotation);
+				this.mergeComponents(pos, type);
 			} else {
-				this.single(pos, type, rotation);
+				this.single(pos, type);
 			}
-		} else if (c && c.type === type) {
+		}  else {
 			if (def.merge) {
-				c.install(f);
-			} else {
-				this.single(pos, type, rotation);
-			}
-		} else {
-			if (def.merge) {
-				this.mergeComponents(pos, type, rotation);
+				this.mergeComponents(pos, type);
 			}else {
-				this.single(pos, type, rotation);
+				this.single(pos, type);
 			}
 		}
 	}
 
-	single(pos: Pos, type: string, rotation: number = 0) {
+	single(pos: Pos, type: string) {
 		const f = this.getPos(pos);
-		const newComponent = new Components[type](this);
-		newComponent.install(f, rotation);
+		if(!f) return;
+		const newComponent = new Components[type as keyof typeof Components](this);
+		newComponent.install(f);
 		this.ctrls.push(newComponent);
 		if(type === 'tunnel'){
 			this.crossMergeLinks(pos);
@@ -133,7 +130,7 @@ export class World {
 		}
 	}
 
-	mergeComponents(pos: Pos, type: string, rotation: number = 0) {
+	mergeComponents(pos: Pos, type: string) {
 		const f = this.getPos(pos);
 		if(!f) return;
 		const neighbours = this.getNeighbourComponents(pos).filter(Boolean).filter(c => {
@@ -154,19 +151,19 @@ export class World {
 			neighbours[0].install(f);
 		}
 		if(neighbours.length === 0) {
-			const newComponent = new Components[type](this);
-			newComponent.install(f, rotation);
+			const newComponent = new Components[type as keyof typeof Components](this);
+			newComponent.install(f);
 			this.ctrls.push(newComponent);
 		}
 		
 		if(neighbours.length > 1) {
-			const newComponent = new Components[type](this);
+			const newComponent = new Components[type as keyof typeof Components](this);
 			newComponent.install(f);
 			this.ctrls.push(newComponent);
 			neighbours.forEach(c => {
 				const fields = [...c.fields];
 				fields.forEach(f => c.uninstall(f));
-				fields.forEach(f => newComponent.install(f, f.rotation));
+				fields.forEach(f => newComponent.install(f));
 				this.ctrls = this.ctrls.filter(ctrl => ctrl !== c);
 			});
 		}

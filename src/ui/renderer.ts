@@ -1,4 +1,4 @@
-import { Application, Assets, Graphics, Container, Spritesheet, Sprite } from "pixi.js";
+import { Application, Assets, Graphics, Container, Spritesheet, Texture} from "pixi.js";
 import { PALETTE } from "./palette";
 import { Pos } from "../pos";
 import { Rect } from "../rect";
@@ -13,6 +13,7 @@ export class Renderer {
 	sheet?: Spritesheet;
 	rendererSymbol = Symbol('renderer');
 	listeners: Record<string, (() => void)[]> = {};
+	logoTexture?: Texture;
 	
 	constructor(private core: Core) {
 	}
@@ -52,6 +53,7 @@ export class Renderer {
 			}
 		});
 		this.sheet = await Assets.load("/Logics/Logics.json");
+		this.logoTexture = await Assets.load("logo.png");
 
 		document.body.appendChild(this.app.canvas);
 
@@ -71,7 +73,7 @@ export class Renderer {
 
 		this.background.interactive = true;
 
-		this.app.renderer.view.canvas.addEventListener('wheel', this.onMouseWheel);
+		this.app.renderer.view.canvas.addEventListener?.('wheel', this.onMouseWheel);
 
 		document.body.addEventListener("wheel", (event) => {
 			event.preventDefault()
@@ -82,7 +84,8 @@ export class Renderer {
 			this.redrawBackground();
 		});
 	}
-	onMouseWheel = (event: WheelEvent) => {
+	onMouseWheel = (ev: Event) => {
+		const event: WheelEvent = ev as WheelEvent;
 		const dx = event.deltaX;
 		const dy = event.deltaY;
 		if (event.shiftKey) {

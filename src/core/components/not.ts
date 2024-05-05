@@ -1,20 +1,18 @@
-import { Component } from './component';
-import type { World } from '../world';
+import { Component, ComponentDefinition } from './component';
 
 export class Not extends Component {
-	static definition = Component.createDefinition('not', {
+	static definition: ComponentDefinition = {
+		type: 'not',
 		description: 'Not - a component that outputs the opposite of the input',
+		power: false,
+		merge: false,
 		rotations: 4,
 		space: [
 			0, 0, 0,
 			3, 1, 2,
 			0, 0, 0
 		],
-	});
-
-	constructor(world: World) {
-		super(world, Not.definition);
-	}
+	};
 
 	update(){
 		this.output.value = !this.inputs.some(i => i.powered)

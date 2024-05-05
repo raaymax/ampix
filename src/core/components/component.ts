@@ -3,6 +3,15 @@ import { Output } from '../output';
 import type { Field } from "../field";
 import type { World } from "../world";
 
+export type ComponentDefinition = {
+	type: string;
+	description: string;
+	power: boolean;
+	merge: boolean;
+	rotations: number;
+	space: number[];
+}
+
 export class Component {
 	type: string;
 	label: string = '';
@@ -13,26 +22,10 @@ export class Component {
 	world: World;
 	inputs: Field[] = [];
 	listeners: Record<string, ((component: Component) => void)[]> = {};
-	definition: any;
 	error: string | null = null;
 	
-	static createDefinition = (type:string, ext = {}) => {
-		return {
-			type,
-			power: false,
-			merge: true,
-			rotations: 1,
-			space: [
-				0, 0, 0,
-				0, 1, 0,
-				0, 0, 0
-			],
-			...ext
-		}
-	}
-	
 	getIO = (field: Field) => {
-		const definition = this.definition;
+		const definition: ComponentDefinition = (this.constructor as any).definition;
 		const n = this.world.getNeighbours(field);
 		const p = [
 			definition.space[1],
@@ -53,8 +46,12 @@ export class Component {
 	}
 
 
-	constructor(world: World, public definition) {
-		this.type = definition.type;
+	constructor(world: World) {
+		const constructor = this.constructor as any;
+		if(!constructor.definition){
+			throw new Error("Component must have definition static property with ComponentDefinition type");
+		}
+		this.type = constructor.definition.type;
 		this.world = world;
 	}
 
@@ -118,10 +115,9 @@ export class Component {
 
 	}
 
-	update() {
-	}
+	update(_dt: number) {}
 
-	safeUpdate(dt) {
+	safeUpdate(dt: number) {
 		if (this.inputs.length > 0 && this.inputs.map(i=> i.powered).filter(p => typeof p !== 'undefined').length === 0){
 			this.error = "error";
 			this.emit('change');
