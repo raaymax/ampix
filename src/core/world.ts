@@ -158,7 +158,6 @@ export class World {
 		}).map(c => {
 			if (c.type === 'tunnel') {
 				const other = this.getPos(c.fields[0].add(c.fields[0].sub(pos)))?.component;
-				console.log(other)
 				if (other?.type === 'link') {
 					return other;
 				}
@@ -166,8 +165,6 @@ export class World {
 			}
 			return c;
 		}).filter(Boolean) as Component[];
-
-		console.log(neighbours)
 
 		if(neighbours.length === 1) {
 			neighbours[0].install(f);
