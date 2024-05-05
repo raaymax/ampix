@@ -4,12 +4,12 @@ export const PALETTE = {
   empty: '#333345',
   void: '#444455',
 	uiButton: {
-		normal: '#888',
-		hover: '#666',
-		active: '#55b',
+		normal: '#ccc',
+		hover: '#fe6f59',
+		active: '#2cd9b3',
 	},
 	tooltip: {
-		background: '#888',
+		background: '#ccc',
 		text: '#000',
 		border: '#000',
 	},
@@ -18,10 +18,7 @@ export const PALETTE = {
 		component: '#444499',
 		input: '#6abe30',
 		output: '#d95763',
-		//input: {unpowered: '#37946e', powered: '#6abe30'},
-		//output: {unpowered: '#ac3232', powered: '#d95763'},
 	},
-
 	component: {
     tunnel: '#b370ff',
 		clock: '#ffffff',
