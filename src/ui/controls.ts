@@ -53,7 +53,7 @@ export class Controls {
 		this.container.addChild(this.tooltipTop.container);
 		this.container.addChild(this.tooltipBottom.container);
 		this.container.addChild(this.tooltipRotate.container);
-		this.tooltipRotate.container.position.set(20, this.renderer.height - 120);
+		this.tooltipRotate.container.position.set(21, this.renderer.height - 120);
 		this.container.addChild(this.createGHLink());
 
 		window.addEventListener('resize', () => {
