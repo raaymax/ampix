@@ -36,19 +36,13 @@ export class Cursor {
 			this.rotation = this.rotation % this.definition.rotations;
 			this.redrawCursor();
 		});
-		this.renderer.background.on('pointerdown', (event) => {
-			const pos = this.renderer.screenToWorldPos(Pos.from(event.screen));
-			if (this.renderer.isWorldSpace(pos)) {
-				this.core.positionClicked(pos, this.rotation);
-			}
-		});
 		let pointerDown = false;
 		this.renderer.background.on('pointerdown', (event) => {
-			pointerDown = true;
 			const pos = this.renderer.screenToWorldPos(Pos.from(event.screen));
 			if (this.renderer.isWorldSpace(pos)) {
 				this.core.positionClicked(pos, this.rotation);
 			}
+			pointerDown = !this.core.isToolActive('interact');
 		});
 		this.renderer.background.on('pointermove', (event) => {
 			if(pointerDown) {

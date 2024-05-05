@@ -12,6 +12,26 @@ export class World {
 			.map((_, idx) => new Field(idx % width, Math.floor(idx / width)));
 	}
 
+	serialize() {
+		return {
+			world: this.data
+				.filter(f => f.type !== 'empty')
+				.map(f => ({
+					x: f.x,
+					y: f.y, 
+					type: f.type,
+					rotation: f.rotation
+				}))
+		};
+	}
+
+	deserialize(data: any) {
+		data.world.forEach((f: any) => {
+			this.setPos(new Pos(f.x, f.y), f.type, f.rotation);
+		});
+	
+	}
+
 	isPosValid(pos: Pos): boolean {
 		return pos.x >= 0 && pos.y >= 0 && pos.x < this.width && pos.y < this.height;
 	}

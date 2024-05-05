@@ -99,6 +99,41 @@ export class Core {
 					interact: this.state.remove  
 				});
 				break;
+			case 'export':
+				Object.assign(tools, {
+					play: Boolean(this.state.play),
+					pause: Boolean(this.state.pause),
+					interact: true
+				});
+				const tempLink = document.createElement("a");
+				const json = JSON.stringify(this.world.serialize());
+				const taBlob = new Blob([json], {type: 'text/plain'});
+				tempLink.setAttribute('href', URL.createObjectURL(taBlob));
+				tempLink.setAttribute('download', `ampix-${Date.now()}.json`);
+				tempLink.click();
+				URL.revokeObjectURL(tempLink.href);
+				break;
+			case 'import':
+				Object.assign(tools, {
+					play: Boolean(this.state.play),
+					pause: Boolean(this.state.pause),
+					interact: true
+				});
+				
+				const input = document.createElement('input');
+				input.type = 'file';
+				input.onchange = () => { 
+					const reader = new FileReader();
+					reader.onload = () => {
+						if(reader.result === null) return;
+						const json = JSON.parse(reader.result.toString());
+						this.world.clear();
+						this.world.deserialize(json);
+					};
+					reader.readAsText(input.files?.[0] as Blob);
+				}
+				input.click();
+				break;
 
 			default:
 				Object.assign(tools, {

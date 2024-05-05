@@ -157,6 +157,10 @@ export class Controls {
 			null,
 			this.createButton("clear"),
 			this.createButton("remove"),
+			null,
+			this.createButton("import"),
+			this.createButton("export"),
+
 			//this.createButton("label"),
 		].forEach((component, idx) => {
 			if (!component) return;
