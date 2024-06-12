@@ -12,6 +12,13 @@ export class Pos{
 		return new Pos(pos.x, pos.y);
 	}
 
+	floor(): Pos {
+		return new Pos(Math.floor(this.x), Math.floor(this.y));
+	}
+	round(): Pos {
+		return new Pos(Math.round(this.x), Math.round(this.y));
+	}
+
 	eq(p2: Pos): boolean {
 		return this.x === p2.x && this.y === p2.y;
 	}

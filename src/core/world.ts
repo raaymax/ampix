@@ -2,14 +2,24 @@ import { Component } from "./components/component";
 import { Pos } from "../pos";
 import Components from "./components";
 import { Field } from "./field";
+import { Thing } from "./things/thing";
+import { Emitter } from "./emitter";
 
 export class World {
+	things: Thing[] = []
 	ctrls: Component[] = [];
+	emitter = new Emitter<Thing>()
 	data: Field[];
 
 	constructor(public width: number, public height: number) {
 		this.data = Array(width * height).fill(null)
 			.map((_, idx) => new Field(idx % width, Math.floor(idx / width)));
+		this.things.push(new Thing(new Pos(5,5), this));
+	}
+
+	addThing(t: Thing){
+		this.things.push(t);
+		this.emitter.emit('thing', t);
 	}
 
 	serialize() {
@@ -202,6 +212,7 @@ export class World {
 
 	tick(dt: number) {
 		this.ctrls.forEach(c => c.safeUpdate(dt));
+		this.things.forEach(t => t.update());
 	}
 
 	rmCtrl = (c: Component) => {

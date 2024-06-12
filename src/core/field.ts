@@ -1,23 +1,26 @@
 import { Pos } from '../pos';
 import Components, { Component } from './components';
+import { Emitter } from './emitter';
 import { Output } from './output';
 
 export class Field extends Pos {
+	thing: Thing | null;
 	component: Component | null = null;
-	listeners: Record<string, ((field: Field) => void)[]> = {};
+	emitter = new Emitter<Field>();
 	outputSources: Output[] = [];
 	rotation: number = 0;
+
 
 	constructor(x: number, y: number) {
 		super(x, y);
 	}
 
-	addOutputSource(c: Output) {
+	addDataSource(c: Output) {
 		this.outputSources.push(c);
 		c.on('change', this.emitPowered);
 	}
 
-	rmOutputSource(c: Output) {
+	rmDataSource(c: Output) {
 		const idx = this.outputSources.indexOf(c);
 		if (idx !== -1) {
 			this.outputSources.splice(idx,1)
@@ -43,17 +46,7 @@ export class Field extends Pos {
 		return this.component?.powered;
 	}
 
-	on(name: string, fn: (field: Field) => void) {
-		this.listeners[name] = this.listeners[name] || [];
-		this.listeners[name].push(fn);
-	}
-
-	off(name: string, fn: (field: Field) => void) {
-		this.listeners[name] = this.listeners[name] || [];
-		this.listeners[name] = this.listeners[name].filter(f => f !== fn);
-	}
-
-	emit(name: string) {
-		(this.listeners[name] || []).forEach(fn => fn(this));
-	}
+	on = this.emitter.on;
+	off = this.emitter.off;
+	emit = (name: string ) => this.emitter.emit(name, this);
 }

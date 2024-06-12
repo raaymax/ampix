@@ -55,22 +55,25 @@ export class Component {
 		this.world = world;
 	}
 
+	init() {}
+
 	install(field: Field) {
 		const {inputs, outputs} = this.getIO(field);
 		outputs.forEach(f => {
-			f.addDataSource(this.output);
+			f.addOutputSource(this.output);
 		});
 		this.inputs.push(...inputs);
 		this.fields.push(field);
 		field.component = this;
 		this.emit('change');
+		this.init();
 	}
 
 	uninstall(field: Field) {
 		const {inputs, outputs} = this.getIO(field);
 		this.output.value = false;
 		outputs.forEach(f => {
-			f.rmDataSource(this.output);
+			f.rmOutputSource(this.output);
 		});
 		inputs.forEach(i => {
 			this.inputs.slice(this.inputs.indexOf(i))
